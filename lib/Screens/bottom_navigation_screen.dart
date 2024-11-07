@@ -1,9 +1,10 @@
 import 'package:assign_mate/assignment/assignment_screen.dart';
-import 'package:assign_mate/Screens/create_assignment_screen.dart';
 import 'package:assign_mate/Screens/more_screen.dart';
 import 'package:assign_mate/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+
+import '../assignment/create_assignment_screen.dart';
 
 class BottomNavigationScreen extends StatefulWidget {
   const BottomNavigationScreen({super.key});
@@ -27,9 +28,8 @@ class _BottomNavigationScreenState extends State<BottomNavigationScreen> {
       bottomNavigationBar: Container(
         color: prColor,
         child:  Padding(
-          padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 8),
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
           child: GNav(
-            backgroundColor: prColor,
               gap: 8,
               color: txColor,
               activeColor: txColor,

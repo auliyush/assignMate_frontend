@@ -1,13 +1,13 @@
 
 class SubmissionResponse{
-  final String submissionId;
-  final String userId;
-  final String assignmentId;
-  final String submissionTitle;
-  final String submissionDescription;
-  final String file;
-  final String submissionDate;
-  final String submissionStatus;
+   String submissionId;
+   String userId;
+   String assignmentId;
+   String submissionTitle;
+   String submissionDescription;
+   String file;
+   String submissionDate;
+   String submissionStatus;
 
   SubmissionResponse({
     required this.submissionId,
@@ -27,7 +27,7 @@ class SubmissionResponse{
         submissionTitle: json['submissionTitle'],
         submissionDescription: json['submissionDescription'],
         file: json['file'],
-        submissionDate: json['submissionDate'],
+        submissionDate: json['submissionDate'] as String,
         submissionStatus: json['submissionStatus']
     );
   }

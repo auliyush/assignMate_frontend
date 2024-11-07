@@ -12,16 +12,23 @@ class AssignmentApiService{
   Future<List<AssignmentResponse>?> getListOfAssignmentApi(BuildContext context) async{
     try{
       final response = await http.get(Uri.parse(getAllAssignmentUrl));
-      if(response.statusCode == 200){
+
+      if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         final apiResponseData = ApiResponse.fromJson(jsonData);
-        if(apiResponseData.data is List<dynamic>){
-          final listOfAssignments = apiResponseData.data.map((e) =>
-              AssignmentResponse.fromJson(e)).toList();
-          print('data fetched');
-          return listOfAssignments!;
+        if (apiResponseData.data is List<dynamic>) {
+          final listOfAssignments = (apiResponseData.data as List<dynamic>)
+              .map((e) => AssignmentResponse.fromJson(e))
+              .toList();
+          print('Data fetched');
+          return listOfAssignments;
+        } else {
+          final singleAssignment = AssignmentResponse.fromJson(apiResponseData.data);
+          print('Single data object fetched');
+          return [singleAssignment]; // Return as a list for consistency.
         }
-      }else{
+      }
+      else{
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invailid response from server')));
       }
     }on http.ClientException catch(e){
@@ -29,10 +36,13 @@ class AssignmentApiService{
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Server Issue try again')));
       return List.empty();
+    }on FormatException catch(e){
+      print('format - $e');
+    }on Exception catch(e){
+      print('Exception - $e');
     }
     return List.empty();
   }
-  // todo fix this api list having null value
-// todo type null is not subtype of list dynamic something null comes
+
 
 }

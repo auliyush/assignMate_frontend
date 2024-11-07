@@ -25,6 +25,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _passwordController = TextEditingController();
   final _codeController = TextEditingController();
   String? _selectedRole = 'user';
+  bool _isPasswordVisible = true;
 
   @override
   Widget build(BuildContext context) {
@@ -95,10 +96,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           return null;
                         },
                         decoration: InputDecoration(
-                          hintText: 'user name',
+                          hintText: 'Enter Name',
                           hintStyle: const TextStyle(color: bgColor),
                           fillColor: Colors.black.withOpacity(0.2),
                           filled: true,
+                          prefixIcon: const Icon(Icons.person,color: txColor,),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15),
                             borderSide: BorderSide.none,
@@ -125,10 +127,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           return null;
                         },
                         decoration: InputDecoration(
-                          hintText: 'Phone Number',
+                          hintText: 'Enter PhoneNumber',
                           hintStyle: const TextStyle(color: bgColor),
                           fillColor: Colors.black.withOpacity(0.2),
                           filled: true,
+                          prefixIcon: const Icon(Icons.phone,color: txColor,),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15),
                             borderSide: BorderSide.none,
@@ -143,6 +146,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       child: TextFormField(
                         controller: _passwordController,
                         autovalidateMode: AutovalidateMode.onUnfocus,
+                        keyboardType: TextInputType.visiblePassword,
                          validator: (value){
                           if(value == null || value.isEmpty){
                             return 'Please Enter password';
@@ -150,17 +154,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           return null;
                          },
                         decoration: InputDecoration(
-                          hintText: 'Your Password',
+                          hintText: 'Create Password',
                           hintStyle: const TextStyle(
                             color: bgColor,
                           ),
                           fillColor: Colors.black.withOpacity(0.2),
                           filled: true,
+                          prefixIcon: const Icon(Icons.key),
+                          suffixIcon: IconButton(
+                              onPressed: (){
+                                setState(() {
+                                  _isPasswordVisible = !_isPasswordVisible;
+                                });
+                              },
+                              icon: _isPasswordVisible
+                                  ? const Icon(Icons.visibility_off,color: txColor)
+                                  : const Icon(Icons.remove_red_eye_rounded,color: txColor),
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15),
                             borderSide: BorderSide.none,
                           ),
                         ),
+                        obscureText: _isPasswordVisible,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -245,7 +261,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       _passwordController.text,
                                       _selectedRole!, context);
                                   print(res);
-                                  Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
                                 }else{
                                   ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(content: Text('Wrong Code')));

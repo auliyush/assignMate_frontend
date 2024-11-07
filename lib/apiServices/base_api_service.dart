@@ -7,6 +7,9 @@ import 'package:assign_mate/main.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+
+import '../BaseScreens/login_Screen.dart';
+import '../Screens/bottom_navigation_screen.dart';
 class BaseApiService {
 
   final loginUrl = '${MyApp.mainUrl}/assignMate/app/login';
@@ -35,6 +38,12 @@ class BaseApiService {
           Provider.of<LoginProvider>(context, listen: false)
               .updateLoginResponse(loginResponse);
           print('Login Id - ${loginResponse.loginId}');
+          // todo remove navigator in every api their only work to return response
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Login Successful')));
+          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
+              builder: (context) => const BottomNavigationScreen()),
+                (Route<dynamic> route) => false,);
           return loginResponse;
         }
       }
@@ -71,6 +80,7 @@ class BaseApiService {
           ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Account created')));
           print('create account status - ${apiResponse.data}');
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
           return apiResponse.data;
 
         }

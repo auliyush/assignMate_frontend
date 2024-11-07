@@ -35,6 +35,9 @@ dependencies:
   provider: ^6.1.2
   url_launcher: ^6.3.0
   google_nav_bar: ^5.0.7
+  flutter_pdfview: ^1.0.6
+  pdfx: ^2.0.0
+  cached_network_image: ^3.2.1
 
 
   # The following adds the Cupertino Icons font to your application.

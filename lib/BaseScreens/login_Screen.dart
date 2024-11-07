@@ -15,7 +15,6 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final Uri _urlFB = Uri.parse("https://www.facebook.com/login/");
-
   final Uri _urlGoogle = Uri.parse(
       "https://accounts.google.com/v3/signin/identifier?continue"
           "=https%3A%2F%2Faccounts.google.com%2F&followup="
@@ -26,6 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _phoneNumberController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _isPasswordVisible = true;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -102,6 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             hintStyle: const TextStyle(color: bgColor),
                             fillColor: Colors.black.withOpacity(0.2),
                             filled: true,
+                            prefixIcon: const Icon(Icons.phone,color: txColor),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(15),
                               borderSide: BorderSide.none,
@@ -115,6 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: TextFormField(
                           controller: _passwordController,
                           autovalidateMode: AutovalidateMode.onUnfocus,
+                          keyboardType: TextInputType.visiblePassword,
                           validator: (value){
                             if(value == null || value.isEmpty){
                               return "Please Enter Password";
@@ -128,11 +130,27 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             fillColor: Colors.black.withOpacity(0.2),
                             filled: true,
+                            prefixIcon: const Icon(
+                                Icons.key,
+                              color: txColor,
+                            ),
+                            suffixIcon: IconButton(
+                                onPressed: (){
+                                  setState(() {
+                                    _isPasswordVisible = !_isPasswordVisible;
+                                  });
+                                },
+                                icon:
+                                _isPasswordVisible
+                                    ? const Icon(Icons.visibility_off,color: txColor)
+                                    : const Icon(Icons.remove_red_eye_rounded,color: txColor),
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(15),
                               borderSide: BorderSide.none,
                             ),
                           ),
+                          obscureText: _isPasswordVisible,
                         ),
                       ),
                       // Login button
@@ -150,8 +168,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                   apiService.loginApi(
                                       _phoneNumberController.text,
                                       _passwordController.text, context);
-                                  Navigator.pushReplacement(context, MaterialPageRoute(
-                                      builder: (context) => const BottomNavigationScreen()));
                                 }
                               },
                             style: ElevatedButton.styleFrom(

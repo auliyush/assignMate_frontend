@@ -10,10 +10,8 @@ class CreateAssignmentScreen extends StatefulWidget {
 class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text('create Assignment'),
-      ),
+    return Scaffold(
+
     );
   }
 }

@@ -32,14 +32,15 @@ class _AssignmentScreenState extends State<AssignmentScreen> {
         children: [
           Stack(
             children: [
+              // container color
               Container(
-                height: 130,
+                height: screenHeight * 0.14,
                 decoration: const BoxDecoration(
                   color: prColor,
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(left: 18, top: 70),
+                padding:  EdgeInsets.only(left: screenWidth * 0.04, top: screenHeight * 0.07),
                 child: Text(
                   "Assignments",
                   style: TextStyle(
@@ -60,9 +61,7 @@ class _AssignmentScreenState extends State<AssignmentScreen> {
             ],
           ),
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: FutureBuilder<List<AssignmentResponse>?>(
+            child: FutureBuilder<List<AssignmentResponse>?>(
                 future: _listOfAssignments,
                 builder: (context, snapshot){
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -85,7 +84,6 @@ class _AssignmentScreenState extends State<AssignmentScreen> {
                   }
                 },
               ),
-            ),
           ),
         ],
       ),
