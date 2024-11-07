@@ -4,7 +4,7 @@ import 'package:assign_mate/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 
-import '../assignment/create_assignment_screen.dart';
+import '../admin/create_assignment_screen.dart';
 
 class BottomNavigationScreen extends StatefulWidget {
   const BottomNavigationScreen({super.key});

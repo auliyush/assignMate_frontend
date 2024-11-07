@@ -2,6 +2,7 @@
 class SubmissionResponse{
    String submissionId;
    String userId;
+   String userName;
    String assignmentId;
    String submissionTitle;
    String submissionDescription;
@@ -12,6 +13,7 @@ class SubmissionResponse{
   SubmissionResponse({
     required this.submissionId,
     required this.userId,
+    required this.userName,
     required this.assignmentId,
     required this.submissionTitle,
     required this.submissionDescription,
@@ -23,6 +25,7 @@ class SubmissionResponse{
     return SubmissionResponse(
         submissionId: json['submissionId'],
         userId: json['userId'],
+        userName: json['userName'],
         assignmentId: json['assignmentId'],
         submissionTitle: json['submissionTitle'],
         submissionDescription: json['submissionDescription'],

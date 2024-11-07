@@ -16,8 +16,6 @@ class SubmissionCardPage extends StatefulWidget {
 }
 
 class _SubmissionCardPageState extends State<SubmissionCardPage> {
-  final String userName = 'Saumya kumari';
-  final String submissionStatus = 'Reviewed';
 
   // @override
   // void initState() {
@@ -71,9 +69,9 @@ class _SubmissionCardPageState extends State<SubmissionCardPage> {
                   Container(
                       padding: EdgeInsets.only(left: screenWidth * 0.04),
                       width: screenWidth * 0.6,
-                      child: userName.length > 25
+                      child: widget.submission.userName.length > 25
                           ? Text(
-                              '${userName.substring(0, 25)}...',
+                              '${widget.submission.userName.substring(0, 25)}...',
                               style: TextStyle(
                                 fontSize: screenWidth * 0.04,
                                 fontWeight: FontWeight.w500,
@@ -84,7 +82,7 @@ class _SubmissionCardPageState extends State<SubmissionCardPage> {
                               ),
                             )
                           : Text(
-                              userName,
+                        widget.submission.userName,
                               style: TextStyle(
                                 fontSize: screenWidth * 0.04,
                                 fontWeight: FontWeight.w500,
@@ -101,16 +99,16 @@ class _SubmissionCardPageState extends State<SubmissionCardPage> {
                       child: Row(
                         children: [
                           CircleAvatar(
-                            backgroundColor: submissionStatus == 'Reviewed'
+                            backgroundColor: widget.submission.submissionStatus == 'Reviewed'
                                 ? Colors.green
-                                : submissionStatus == 'Pending'
+                                : widget.submission.submissionStatus == 'Pending'
                                     ? Colors.yellow
                                     : Colors.red,
                             radius: 6,
                           ),
                           SizedBox(width: screenWidth * 0.02),
                           Text(
-                            submissionStatus,
+                            widget.submission.submissionStatus,
                             style: TextStyle(
                                 fontSize: screenWidth * 0.04,
                                 fontWeight: FontWeight.w500,

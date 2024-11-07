@@ -38,6 +38,8 @@ dependencies:
   flutter_pdfview: ^1.0.6
   pdfx: ^2.0.0
   cached_network_image: ^3.2.1
+  cloudinary_flutter: ^1.0.0
+  file_picker: ^5.2.7
 
 
   # The following adds the Cupertino Icons font to your application.
