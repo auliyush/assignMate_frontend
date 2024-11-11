@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 
 import '../admin/admin_assignment_screen.dart';
-import '../colors.dart';
+import '../DataClasses/colors.dart';
 import 'more_screen.dart';
 
 class BottomNavigation extends StatefulWidget {

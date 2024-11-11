@@ -3,10 +3,15 @@ import 'package:assign_mate/DataClasses/submission_response.dart';
 import 'package:assign_mate/Providers/login_provider.dart';
 import 'package:assign_mate/apiServices/feedback_api_service.dart';
 import 'package:assign_mate/apiServices/submission_api_service.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import '../colors.dart';
+
+import '../DataClasses/colors.dart';
+import '../Screens/pdf_screen.dart';
+import 'admin_assignment_detail_screen.dart';
 
 class AdminSubmissionDetailScreen extends StatefulWidget {
   SubmissionResponse submission;
@@ -167,42 +172,44 @@ class _AdminSubmissionDetailScreenState extends State<AdminSubmissionDetailScree
                       ),
                     ),
                     // for pdf viewing but current not able todo make able
-                    GestureDetector(
-                      onTap: () {
-                        // Open the full PDF view when the container is tapped
-                        // print('tap');
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (context) => FullPDFScreen(pdfUrl: widget.submission.file),
-                        //   ),
-                        // );
-                      },
-                      child: Container(
-                        width: screenWidth,
-                        height: screenHeight * 0.1,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black),
-                        ),
-                        child: Stack(
-                          children: [
-                            PDFView(
-                              filePath: widget.submission.file, // You can set a preview file here, or use an image preview
-                              onPageChanged: (int? current, int? total) {},
-                            ),
-                            Positioned(
-                              bottom: 0,
-                              right: 10,
-                              child: IconButton(
-                                icon: Icon(Icons.download),
-                                //onPressed: () => _downloadPDF(widget.assignment.file),
-                                onPressed: (){},
+                    Align(
+                        alignment: Alignment.center,
+                        child: GestureDetector(
+                          onTap: () async {
+                            final filePath = await downloadAndSavePdf(widget.submission.file,context);
+                            Navigator.push(context,
+                              MaterialPageRoute(
+                                builder: (context) => FullScreenPdfViewer(
+                                    filename: widget.submission.file.split('/').last
+                                    ,filePath: filePath),
                               ),
+                            );
+                          },
+                          child: Container(
+                            height: screenHeight * 0.08,
+                            width: screenWidth * 0.9,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(9),
+                              color: bgColor,
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
+                            child: Row(
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.only(right: screenWidth * 0.02, left: screenWidth * 0.02),
+                                  child: Icon(
+                                    Icons.picture_as_pdf,
+                                    color: Colors.red,
+                                    size: screenWidth * 0.12,
+                                  ),
+                                ),
+                                Text(
+                                    widget.submission.file.split('/').last
+                                )
+                              ],
+                            ),
+                          ),
+                        )
+                    )
                   ],
                 ),
               ),
@@ -320,8 +327,6 @@ class _AdminSubmissionDetailScreenState extends State<AdminSubmissionDetailScree
                       Navigator.of(context).push(MaterialPageRoute(
                         builder: (context) => AdminSubmissionDetailScreen(submission: widget.submission),
                       ));
-
-                      // todo here not complete feedback
                     }
                   },
                 style: ElevatedButton.styleFrom(
@@ -342,12 +347,28 @@ class _AdminSubmissionDetailScreenState extends State<AdminSubmissionDetailScree
                       )
                     : null),
           ),
-        
-        
-            // todo implement create feedback
           ],
         ),
       )
     );
+  }
+  Future<String> downloadAndSavePdf(String pdfUrl, BuildContext context) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent dismissing by tapping outside the dialog
+      builder: (BuildContext context) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
+    final directory = await getApplicationDocumentsDirectory();
+    final filePath = '${directory.path}/218632515_money-transfer_19102024';
+
+    // Download PDF file using Dio
+    final dio = Dio();
+    await dio.download(pdfUrl, filePath);
+    Navigator.of(context).pop();
+    return filePath;
   }
 }

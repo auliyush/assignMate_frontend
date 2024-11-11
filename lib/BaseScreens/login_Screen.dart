@@ -1,6 +1,6 @@
 import 'package:assign_mate/Providers/login_provider.dart';
 import 'package:assign_mate/apiServices/base_api_service.dart';
-import 'package:assign_mate/colors.dart';
+import 'package:assign_mate/DataClasses/colors.dart';
 import 'package:assign_mate/BaseScreens/sign_up_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';

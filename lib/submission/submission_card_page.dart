@@ -5,7 +5,7 @@ import 'package:assign_mate/apiServices/user_api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../Providers/login_provider.dart';
-import '../colors.dart';
+import '../DataClasses/colors.dart';
 
 class SubmissionCardPage extends StatefulWidget {
   final SubmissionResponse submission;

@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../BaseScreens/login_Screen.dart';
 import '../Screens/notification_screen.dart';
-import '../colors.dart';
+import '../DataClasses/colors.dart';
 
 class AdminMoreScreen extends StatefulWidget {
   const AdminMoreScreen({super.key});

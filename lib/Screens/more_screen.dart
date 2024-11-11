@@ -1,6 +1,6 @@
 import 'package:assign_mate/BaseScreens/login_Screen.dart';
 import 'package:assign_mate/Screens/notification_screen.dart';
-import 'package:assign_mate/colors.dart';
+import 'package:assign_mate/DataClasses/colors.dart';
 import 'package:assign_mate/submission/submissions_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

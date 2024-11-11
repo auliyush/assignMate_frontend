@@ -1,7 +1,7 @@
 import 'package:assign_mate/admin/admin_more_screen.dart';
 import 'package:assign_mate/admin/admin_assignment_screen.dart';
 import 'package:assign_mate/Screens/more_screen.dart';
-import 'package:assign_mate/colors.dart';
+import 'package:assign_mate/DataClasses/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 

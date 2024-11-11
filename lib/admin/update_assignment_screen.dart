@@ -4,13 +4,9 @@ import 'package:assign_mate/DataClasses/assignment_response.dart';
 import 'package:assign_mate/admin/asigned_students_screen.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import '../Providers/login_provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../apiServices/assignment_api_service.dart';
-import '../apiServices/cloudinary_api_service.dart';
-import '../colors.dart';
-import 'admin_bottom_navigation.dart';
+import '../DataClasses/colors.dart';
 
 class UpdateAssignmentScreen extends StatefulWidget {
   final AssignmentResponse assignmentResponse;
@@ -31,7 +27,6 @@ class _UpdateAssignmentScreenState extends State<UpdateAssignmentScreen> {
   late String adminId;
   String fileName = "";
   late List<String>? assignedStudentIds;
-
   @override
   void initState() {
     super.initState();
@@ -93,7 +88,7 @@ class _UpdateAssignmentScreenState extends State<UpdateAssignmentScreen> {
                 ),
               ],
             ),
-            Container(
+            SizedBox(
                 height: screenHeight * 0.7,
                 child: Column(
                   children: [
@@ -171,7 +166,7 @@ class _UpdateAssignmentScreenState extends State<UpdateAssignmentScreen> {
                               children: [
                                 // file
                                 ElevatedButton(
-                                  onPressed: pickAndUploadPdf,
+                                  onPressed: uploadFile,
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: seColor,
                                     shape: RoundedRectangleBorder(
@@ -241,7 +236,7 @@ class _UpdateAssignmentScreenState extends State<UpdateAssignmentScreen> {
                                   SizedBox(width: 10),
                                   Expanded(
                                     child: Text(
-                                      fileName,
+                                      pdfFileUrl!.split('/').last,
                                       // Display the file name
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
@@ -332,42 +327,23 @@ class _UpdateAssignmentScreenState extends State<UpdateAssignmentScreen> {
       ),
     );
   }
-  Future<void> pickAndUploadPdf() async {
-    // Pick the PDF file
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf'], // Allow only PDF files
-    );
-    if (result != null && result.files.isNotEmpty) {
-      File pickedFile = File(result.files.single.path!);
-      fileName = result.files[0].name;
-
-      showDialog(
-        context: context,
-        barrierDismissible: false, // Prevent dismissing by tapping outside the dialog
-        builder: (BuildContext context) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        },
-      );
-      // Call Cloudinary upload method
-      CloudinaryApiService cloudinaryApiService = CloudinaryApiService();
-      String? pdfUrl = await cloudinaryApiService.uploadPdfToCloudinary(pickedFile);
-
-      // Check the result of the upload
-      if (pdfUrl != null) {
-        print('PDF uploaded successfully: $pdfUrl');
-        Navigator.of(context).pop();
+  Future<void> uploadFile() async {
+    final SupabaseClient supabase = Supabase.instance.client;
+    final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
+    if (result != null) {
+      final file = File(result.files.single.path!);
+      final fileName = result.files.single.name;
+      try {
+        final response = await supabase.storage.from('assignmatepdf-uploads').upload(fileName, file);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('File uploaded successfully')));
         setState(() {
-          pdfFileUrl = pdfUrl;
+          pdfFileUrl = supabase.storage.from('assignmatepdf-uploads').getPublicUrl(fileName);
         });
-        // Use the PDF URL as needed
-      } else {
-        print('Failed to upload PDF');
+        print('File uploaded successfully: $pdfFileUrl');
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error uploading file')));
+        print('Error uploading file: $e');
       }
-    } else {
-      print("No file selected or file picker was cancelled.");
     }
   }
 }

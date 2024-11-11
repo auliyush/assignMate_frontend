@@ -2,7 +2,7 @@ import 'package:assign_mate/apiServices/base_api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../colors.dart';
+import '../DataClasses/colors.dart';
 import 'login_Screen.dart';
 
 class SignUpScreen extends StatefulWidget {

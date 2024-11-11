@@ -6,7 +6,7 @@ import 'package:assign_mate/submission/submission_card_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../DataClasses/submission_response.dart';
-import '../colors.dart';
+import '../DataClasses/colors.dart';
 
 class AssignmentDetailScreen extends StatefulWidget {
 

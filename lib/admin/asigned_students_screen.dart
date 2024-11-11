@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../DataClasses/assignment_response.dart';
 import '../DataClasses/user_response.dart';
-import '../colors.dart';
+import '../DataClasses/colors.dart';
 
 class AssignedStudentsScreen extends StatefulWidget {
   final AssignmentResponse? assignmentResponse;

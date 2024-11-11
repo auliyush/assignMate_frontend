@@ -6,7 +6,7 @@ import 'package:assign_mate/apiServices/user_api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../colors.dart';
+import '../DataClasses/colors.dart';
 import 'assignment_card_page.dart';
 
 class AssignmentScreen extends StatefulWidget {

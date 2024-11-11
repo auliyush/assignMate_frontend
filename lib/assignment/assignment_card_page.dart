@@ -1,7 +1,7 @@
 import 'package:assign_mate/DataClasses/assignment_response.dart';
 import 'package:assign_mate/Providers/login_provider.dart';
 import 'package:assign_mate/admin/admin_assignment_detail_screen.dart';
-import 'package:assign_mate/colors.dart';
+import 'package:assign_mate/DataClasses/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

@@ -1,18 +1,13 @@
-import 'dart:io';
-
 import 'package:assign_mate/DataClasses/assignment_response.dart';
 import 'package:assign_mate/admin/update_assignment_screen.dart';
 import 'package:assign_mate/submission/submission_card_page.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:pdfx/pdfx.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../DataClasses/submission_response.dart';
 import '../apiServices/submission_api_service.dart';
-import '../colors.dart';
-import 'package:http/http.dart' as http;
+import '../DataClasses/colors.dart';
+import '../Screens/pdf_screen.dart';
 
 class AdminAssignmentDetailScreen extends StatefulWidget {
   final AssignmentResponse assignment;
@@ -28,43 +23,11 @@ class AdminAssignmentDetailScreen extends StatefulWidget {
 class _AdminAssignmentDetailScreenState extends State<AdminAssignmentDetailScreen> {
   late Future<List<SubmissionResponse>?> _listOfSubmissions;
   SubmissionApiService submissionApiService = SubmissionApiService();
-  bool _isPdfLoading = true;
-  bool _isValidPdf = false;
 
   @override
   void initState() {
     super.initState();
     _listOfSubmissions = submissionApiService.getAllSubmissionsOfAssignmentApi(widget.assignment.assignmentId, context);
-    // _checkPdfAvailability();
-  }
-  void _checkPdfAvailability() async{
-    try{
-      final pdf = await PdfDocument.openAsset(widget.assignment.file);
-      if(pdf.pagesCount > 0){
-        setState(() {
-          _isPdfLoading = false;
-          _isValidPdf = true;
-        });
-      }else{
-        throw Exception("PDF is empty or invalid");
-      }
-    }catch(e){
-      setState(() {
-        _isValidPdf = false;
-        _isPdfLoading = false;
-      });
-    }
-  }
-
-  Future<void> _openPdf() async {
-    final Uri pdfUri = Uri.parse(widget.assignment.file);
-    if (await canLaunchUrl(pdfUri)) {
-      await launchUrl(pdfUri, mode: LaunchMode.externalApplication);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Cannot open PDF")),
-      );
-    }
   }
 
   @override
@@ -194,11 +157,43 @@ class _AdminAssignmentDetailScreenState extends State<AdminAssignmentDetailScree
                               ),
                             ),
                             // for pdf viewing but current not able todo make able
-                            ElevatedButton(
-                                onPressed: (){
-
+                            Align(
+                              alignment: Alignment.center,
+                              child: GestureDetector(
+                                onTap: () async {
+                                  final filePath = await downloadAndSavePdf(widget.assignment.file,context);
+                                  Navigator.push(context,
+                                    MaterialPageRoute(
+                                      builder: (context) => FullScreenPdfViewer(
+                                          filename: widget.assignment.file.split('/').last
+                                          ,filePath: filePath),
+                                    ),
+                                  );
                                 },
-                                child: Text('Tap Here'),
+                                child: Container(
+                                  height: screenHeight * 0.08,
+                                  width: screenWidth * 0.9,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(9),
+                                    color: bgColor,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Padding(
+                                        padding: EdgeInsets.only(right: screenWidth * 0.02, left: screenWidth * 0.02),
+                                        child: Icon(
+                                          Icons.picture_as_pdf,
+                                          color: Colors.red,
+                                          size: screenWidth * 0.12,
+                                        ),
+                                      ),
+                                      Text(
+                                        widget.assignment.file.split('/').last
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              )
                             )
                           ],
                         ),
@@ -243,7 +238,7 @@ class _AdminAssignmentDetailScreenState extends State<AdminAssignmentDetailScree
       ),
     );
   }
-  void downloadPdf(String pdfUrl) async {
+  Future<String> downloadAndSavePdf(String pdfUrl, BuildContext context) async {
     showDialog(
       context: context,
       barrierDismissible: false, // Prevent dismissing by tapping outside the dialog
@@ -253,41 +248,14 @@ class _AdminAssignmentDetailScreenState extends State<AdminAssignmentDetailScree
         );
       },
     );
-    //String pdfUrl = 'https://res.cloudinary.com/YOUR_CLOUD_NAME/raw/upload/v1234567890/sample.pdf';
-    File? pdfFile = await downloadPdfFromCloudinary(pdfUrl, 'my_pdf');
+    final directory = await getApplicationDocumentsDirectory();
+    final filePath = '${directory.path}/218632515_money-transfer_19102024';
 
-    if (pdfFile != null) {
-      print('PDF downloaded to: ${pdfFile.path}');
-      Navigator.of(context).pop();
-    } else {
-      print('Failed to download PDF.');
-      Navigator.of(context).pop();
-    }
-  }
-  Future<File?> downloadPdfFromCloudinary(String pdfUrl, String fileName) async {
-    try {
-      // Request the PDF file from Cloudinary
-      final response = await http.get(Uri.parse(pdfUrl));
-
-      if (response.statusCode == 200) {
-        // Get the device's temporary directory
-        final directory = await getTemporaryDirectory();
-
-        // Create a file with the specified filename
-        final file = File('${directory.path}/$fileName.pdf');
-
-        // Write the PDF bytes to the file
-        await file.writeAsBytes(response.bodyBytes);
-
-        // Return the file
-        return file;
-      } else {
-        print('Failed to download PDF: ${response.statusCode}');
-        return null;
-      }
-    } catch (e) {
-      print('Error downloading PDF: $e');
-      return null;
-    }
+    // Download PDF file using Dio
+    final dio = Dio();
+    await dio.download(pdfUrl, filePath);
+Navigator.of(context).pop();
+    return filePath;
   }
 }
+

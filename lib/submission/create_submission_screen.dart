@@ -5,11 +5,12 @@ import 'package:assign_mate/apiServices/submission_api_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../Providers/user_provider.dart';
 import '../apiServices/assignment_api_service.dart';
 import '../apiServices/cloudinary_api_service.dart';
-import '../colors.dart';
+import '../DataClasses/colors.dart';
 
 class CreateSubmissionScreen extends StatefulWidget {
   String assignmentId;
@@ -143,7 +144,7 @@ class _CreateSubmissionScreenState extends State<CreateSubmissionScreen> {
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: ElevatedButton(
-                              onPressed: pickAndUploadPdf,
+                              onPressed: uploadFile,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: seColor,
                                 shape: RoundedRectangleBorder(
@@ -256,46 +257,23 @@ class _CreateSubmissionScreenState extends State<CreateSubmissionScreen> {
       ),
     );
   }
-  Future<void> pickAndUploadPdf() async {
-    // Pick the PDF file
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf'], // Allow only PDF files
-    );
-    if (result != null && result.files.isNotEmpty) {
-      File pickedFile = File(result.files.single.path!);
-      fileName = result.files[0].name;
-
-      showDialog(
-        context: context,
-        barrierDismissible: false, // Prevent dismissing by tapping outside the dialog
-        builder: (BuildContext context) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        },
-      );
-      // Call Cloudinary upload method
-      CloudinaryApiService cloudinaryApiService = CloudinaryApiService();
-      String? pdfUrl = await cloudinaryApiService.uploadPdfToCloudinary(pickedFile);
-
-      // Check the result of the upload
-      if (pdfUrl != null) {
-        print('PDF uploaded successfully: $pdfUrl');
-        Navigator.of(context).pop();
+  Future<void> uploadFile() async {
+    final SupabaseClient supabase = Supabase.instance.client;
+    final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
+    if (result != null) {
+      final file = File(result.files.single.path!);
+      final fileName = result.files.single.name;
+      try {
+        final response = await supabase.storage.from('assignmatepdf-uploads').upload(fileName, file);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('File uploaded successfully')));
         setState(() {
-          pdfFileUrl = pdfUrl;
+          pdfFileUrl = supabase.storage.from('assignmatepdf-uploads').getPublicUrl(fileName);
         });
-        // Use the PDF URL as needed
-      } else {
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to upload PDF')));
-        print('Failed to upload PDF');
+        print('File uploaded successfully: $pdfFileUrl');
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error uploading file')));
+        print('Error uploading file: $e');
       }
-    } else {
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('No file selected or file picker was cancelled')));
-      print("No file selected or file picker was cancelled.");
     }
   }
 }

@@ -1,6 +1,6 @@
 class FeedbackResponse{
-  String feedback;
-  String feedbackDate;
+  String? feedback;
+  String? feedbackDate;
 
   FeedbackResponse({
     required this.feedback, required this.feedbackDate});

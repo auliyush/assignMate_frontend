@@ -1,6 +1,8 @@
 import 'package:assign_mate/DataClasses/notification_response.dart';
 import 'package:flutter/material.dart';
 
+import 'notification_detail_page.dart';
+
 class NotificationCard extends StatelessWidget {
   final NotificationResponse notificationResponse;
 
@@ -19,12 +21,11 @@ class NotificationCard extends StatelessWidget {
         ? '${notificationResponse.notificationDescription.substring(0, 21)}..'
         : notificationResponse.notificationDescription;
   }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: (){
-
+        Navigator.push(context, MaterialPageRoute(builder: (context) => NotificationPage(notificationResponse:  notificationResponse)));
       },
       onLongPress: () => _showDeleteConfirmation(context),
       child: Card(
