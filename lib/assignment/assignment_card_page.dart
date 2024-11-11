@@ -80,7 +80,7 @@ class AssignmentCardPage extends StatelessWidget {
                                   EdgeInsets.only(left: screenWidth * 0.01),
                               width: screenWidth * 0.65,
                               child: Text(
-                                '${assignmentResponse.assignmentName.substring(0, 20)}...',
+                                '${assignmentResponse.assignmentName.substring(0, 19)}..',
                                 style: TextStyle(
                                   fontSize: screenWidth * 0.053,
                                   fontWeight: FontWeight.w600,

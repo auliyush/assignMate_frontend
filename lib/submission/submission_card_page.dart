@@ -1,5 +1,6 @@
 import 'package:assign_mate/DataClasses/submission_response.dart';
 import 'package:assign_mate/DataClasses/user_response.dart';
+import 'package:assign_mate/admin/admin_submission_detail_screen.dart';
 import 'package:assign_mate/apiServices/user_api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -40,7 +41,10 @@ class _SubmissionCardPageState extends State<SubmissionCardPage> {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     return GestureDetector(
-      onTap: () {},
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) =>
+            AdminSubmissionDetailScreen(submission: widget.submission)));
+      },
       child: Padding(
         padding: EdgeInsets.only(
             left: screenWidth * 0.019, right: screenWidth * 0.019),

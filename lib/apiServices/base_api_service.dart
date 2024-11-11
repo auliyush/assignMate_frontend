@@ -3,13 +3,15 @@ import 'dart:convert';
 import 'package:assign_mate/DataClasses/api_response.dart';
 import 'package:assign_mate/DataClasses/login_response.dart';
 import 'package:assign_mate/Providers/login_provider.dart';
+import 'package:assign_mate/apiServices/user_api_service.dart';
 import 'package:assign_mate/main.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 import '../BaseScreens/login_Screen.dart';
-import '../Screens/bottom_navigation_screen.dart';
+import '../Screens/bottom_navigation.dart';
+import '../admin/admin_bottom_navigation.dart';
 class BaseApiService {
 
   final loginUrl = '${MyApp.mainUrl}/assignMate/app/login';
@@ -17,6 +19,15 @@ class BaseApiService {
 
   Future<LoginResponse?> loginApi(String phoneNumber, String password,
       BuildContext context) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent dismissing by tapping outside the dialog
+      builder: (BuildContext context) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
     try {
       final response = await http.post(Uri.parse(loginUrl),
           headers: {
@@ -28,22 +39,41 @@ class BaseApiService {
           }));
 
       if (response.statusCode == 200) {
+        // convert response jsondata
         final jsonData = jsonDecode(response.body);
+        // convert jsondata into apiResponse
         final apiResponseData = ApiResponse.fromJson(jsonData);
+        Navigator.of(context).pop();
+        // validation
         if (apiResponseData.data == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(apiResponseData.errorMessage)));
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(apiResponseData.errorMessage ?? 'An error occurred')),
+            );
+          }
+          return null;
         } else {
+          // convert apiResponse data into loginResponse data
           final loginResponse = LoginResponse.fromJson(apiResponseData.data);
+          // set provider of login details
           Provider.of<LoginProvider>(context, listen: false)
               .updateLoginResponse(loginResponse);
           print('Login Id - ${loginResponse.loginId}');
           // todo remove navigator in every api their only work to return response
+          // call api for getting user
+          UserApiService userApiService = UserApiService();
+          await userApiService.getUserByIdApi(loginResponse.loginId, context);
           ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Login Successful')));
-          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
-              builder: (context) => const BottomNavigationScreen()),
-                (Route<dynamic> route) => false,);
+          if(loginResponse.userRole == "admin"){
+            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
+                builder: (context) => const AdminBottomNavigation()),
+                  (Route<dynamic> route) => false,);
+          }else{
+            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
+                builder: (context) => const BottomNavigation()),
+                  (Route<dynamic> route) => false,);
+          }
           return loginResponse;
         }
       }
@@ -57,6 +87,15 @@ class BaseApiService {
 
   Future<bool> signUpApi(String userName, String phoneNumber, String password, String role,
       BuildContext context) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent dismissing by tapping outside the dialog
+      builder: (BuildContext context) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
     try{
       final response = await http.post(Uri.parse(signUpUrl),
         headers: {
@@ -91,4 +130,5 @@ class BaseApiService {
     }
     return false;
   }
+
 }

@@ -193,11 +193,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         )
                     ),
-
                     // role radia button
                     RadioListTile<String>(
-                        title: const Text('User'),
-                        value: 'user',
+                        title: const Text('Student'),
+                        value: 'student',
                         groupValue: _selectedRole,
                         onChanged: (value) {
                           setState(() {

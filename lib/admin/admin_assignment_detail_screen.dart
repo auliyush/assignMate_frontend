@@ -1,13 +1,18 @@
+import 'dart:io';
+
 import 'package:assign_mate/DataClasses/assignment_response.dart';
+import 'package:assign_mate/admin/update_assignment_screen.dart';
 import 'package:assign_mate/submission/submission_card_page.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 import '../DataClasses/submission_response.dart';
 import '../apiServices/submission_api_service.dart';
 import '../colors.dart';
+import 'package:http/http.dart' as http;
 
 class AdminAssignmentDetailScreen extends StatefulWidget {
   final AssignmentResponse assignment;
@@ -131,18 +136,37 @@ class _AdminAssignmentDetailScreenState extends State<AdminAssignmentDetailScree
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // assignment name text
-                            Container(
-                              padding: EdgeInsets.only(left: screenWidth * 0.02, top: screenWidth * 0.03),
-                              child: const Text(
-                                  'Assignment Name',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w500
+                            Row(
+                              mainAxisAlignment : MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.only(left: screenWidth * 0.03, top: screenWidth * 0.03),
+                                  child: const Text(
+                                    'Assignment Name',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w500
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                SizedBox(
+                                  child: IconButton(
+                                      onPressed: (){
+                                        Navigator.push(context, MaterialPageRoute(
+                                            builder: (context) => UpdateAssignmentScreen(
+                                                assignmentResponse: widget.assignment)));
+                                      },
+                                      icon: Icon(
+                                          Icons.edit,
+                                        size: screenWidth * 0.06,
+                                        color: txColor,
+                                      ),
+                                  ),
+                                ),
+                              ],
                             ),
                             // assignment name
                             Container(
-                              padding: EdgeInsets.only(top: screenHeight * 0.005),
+                              padding: EdgeInsets.only(top: screenHeight * 0.005, left: screenWidth * 0.02),
                               height: widget.assignment.assignmentName.length <= 24
                               ? screenHeight * 0.05
                               : screenHeight * 0.1,
@@ -169,21 +193,13 @@ class _AdminAssignmentDetailScreenState extends State<AdminAssignmentDetailScree
                                 ),
                               ),
                             ),
-                            // PDF container //todo this is not complete because cloudinary not exist
-                            // Container(
-                            //   padding: EdgeInsets.all(16),
-                            //   child: _isPdfLoading
-                            //   ? const CircularProgressIndicator(color: seColor)
-                            //       : GestureDetector(
-                            //     onTap: _openPdf,
-                            //     child: CachedNetworkImage(
-                            //       imageUrl: 'https://example.com/path/to/pdf-thumbnail.jpg', // Replace with your thumbnail URL
-                            //       placeholder: (context, url) => CircularProgressIndicator(),
-                            //       errorWidget: (context, url, error) => Icon(Icons.picture_as_pdf, color: Colors.red, size: 60),
-                            //     ),
-                            //   )
-                            //   ,
-                            // )
+                            // for pdf viewing but current not able todo make able
+                            ElevatedButton(
+                                onPressed: (){
+
+                                },
+                                child: Text('Tap Here'),
+                            )
                           ],
                         ),
                       ),
@@ -226,5 +242,52 @@ class _AdminAssignmentDetailScreenState extends State<AdminAssignmentDetailScree
         ],
       ),
     );
+  }
+  void downloadPdf(String pdfUrl) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent dismissing by tapping outside the dialog
+      builder: (BuildContext context) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
+    //String pdfUrl = 'https://res.cloudinary.com/YOUR_CLOUD_NAME/raw/upload/v1234567890/sample.pdf';
+    File? pdfFile = await downloadPdfFromCloudinary(pdfUrl, 'my_pdf');
+
+    if (pdfFile != null) {
+      print('PDF downloaded to: ${pdfFile.path}');
+      Navigator.of(context).pop();
+    } else {
+      print('Failed to download PDF.');
+      Navigator.of(context).pop();
+    }
+  }
+  Future<File?> downloadPdfFromCloudinary(String pdfUrl, String fileName) async {
+    try {
+      // Request the PDF file from Cloudinary
+      final response = await http.get(Uri.parse(pdfUrl));
+
+      if (response.statusCode == 200) {
+        // Get the device's temporary directory
+        final directory = await getTemporaryDirectory();
+
+        // Create a file with the specified filename
+        final file = File('${directory.path}/$fileName.pdf');
+
+        // Write the PDF bytes to the file
+        await file.writeAsBytes(response.bodyBytes);
+
+        // Return the file
+        return file;
+      } else {
+        print('Failed to download PDF: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('Error downloading PDF: $e');
+      return null;
+    }
   }
 }

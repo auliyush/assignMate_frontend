@@ -1,8 +1,7 @@
-import 'package:assign_mate/Screens/bottom_navigation_screen.dart';
+import 'package:assign_mate/Providers/login_provider.dart';
 import 'package:assign_mate/apiServices/base_api_service.dart';
 import 'package:assign_mate/colors.dart';
 import 'package:assign_mate/BaseScreens/sign_up_screen.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -28,6 +27,8 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isPasswordVisible = true;
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     return Container(
       // this decoration for use white and red color combination using color gradient
         decoration: const BoxDecoration(
@@ -199,11 +200,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           );
                         },
-                        child: const Text(
+                        child: Text(
                           'Don\'t have an account? Create Account',
                           style: TextStyle(
                             color: txColor,
                             letterSpacing: 1,
+                            fontSize: screenWidth * 0.033
                           ),
                         ),
                       ),
@@ -213,8 +215,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           SizedBox(
                             child: IconButton(
                                 icon: SizedBox(
-                                  width: 24,
-                                  height: 24,
+                                  width: screenWidth * 0.06,
                                   child: Image.asset(
                                       'assets/images/google.png'),
                                 ),
@@ -226,8 +227,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SizedBox(width: 10),
                           SizedBox(
                             child: IconButton(
-                              icon: const Icon(
-                                Icons.facebook, color: Colors.blue, size: 30,),
+                              icon: Icon(
+                                Icons.facebook, color: Colors.blue, size: screenWidth * 0.08,),
                               onPressed: () {
                                 launchUrl(_urlFB);
                               },

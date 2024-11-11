@@ -7,7 +7,7 @@ class AssignmentResponse{
    String createDate;
    String dueDate;
    String file;
-
+   List<String> studentsId;
   AssignmentResponse({
     required this.assignmentId,
     required this.assignmentName,
@@ -16,7 +16,9 @@ class AssignmentResponse{
     required this.adminId,
     required this.createDate,
     required this.dueDate,
-    required this.file,});
+    required this.file,
+    required this.studentsId,
+  });
 
   factory AssignmentResponse.fromJson(Map<String, dynamic> json){
     return AssignmentResponse(
@@ -28,7 +30,13 @@ class AssignmentResponse{
     createDate: json['createDate'] as String,
     dueDate: json['dueDate'] as String,
     file: json['assignmentFile'],
+      studentsId: List<String>.from(json['assignedStudentsIdList']),
   );
   }
 
 }
+
+
+
+
+//List<FetchedPlayerData> players = (jsonData['playerList'] as List<dynamic>).map((playerJson) => FetchedPlayerData.fromJson(playerJson)).toList().cast<FetchedPlayerData>();

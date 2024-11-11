@@ -1,12 +1,16 @@
 import 'dart:io';
-
+import 'package:assign_mate/DataClasses/assignment_response.dart';
 import 'package:assign_mate/Providers/login_provider.dart';
+import 'package:assign_mate/Providers/user_provider.dart';
 import 'package:assign_mate/apiServices/assignment_api_service.dart';
-import 'package:assign_mate/apiServices/cloudinary_api_service.dart';
 import 'package:assign_mate/colors.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:provider/provider.dart';
+import 'admin_bottom_navigation.dart';
+import '../apiServices/cloudinary_api_service.dart';
+import 'asigned_students_screen.dart';
 
 class CreateAssignmentScreen extends StatefulWidget {
   const CreateAssignmentScreen({super.key});
@@ -21,241 +25,361 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
   String? pdfFileUrl;
   DateTime? dueDate;
    late String loginId;
+   String fileName = "";
+   List<String>? assignedStudentIds = [];
+
   @override
   void initState() {
-    // TODO: implement initState
+    super.initState();
     loginId = Provider.of<LoginProvider>(context,listen: false).loginResponse!.loginId;
   }
-
-  Future<void> pickPdfFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf'], // Allow only PDF files
-    );
-    if (result != null && result.files.isNotEmpty) {
-      // Convert the file from the result to a File object
-      File pickedFile = File(result.files.single.path!);
-
-      // Call your Cloudinary upload method
-      CloudinaryApiService cloudinaryApiService = CloudinaryApiService();
-      String? pdfUrl = await cloudinaryApiService.uploadPdfToCloudinary(pickedFile);
-      if (pdfUrl != null) {
-        setState(() {
-          pdfFileUrl = pdfUrl; // Display file name
-        });
-        print('PDF uploaded successfully: $pdfUrl');
-      } else {
-        print('Failed to upload PDF');
-      }
-    }
-  }
-
-  // todo uncomplete create assign api and page
 
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: bgColor,
-      body: Column(
-        children: [
-          Stack(
-            children: [
-              // stack image
-              Container(
-                height: screenHeight * 0.17,
-                decoration: const BoxDecoration(
-                  color: prColor,
-                ),
-              ),
-              // assignment name
-              Padding(
-                padding: EdgeInsets.only(left: screenWidth * 0.02, top: screenHeight * 0.11),
-                child: Text(
-                'Create Assignment',
-                  style: TextStyle(
-                    fontSize: screenWidth <= 750 ? screenWidth * 0.07 : 54,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    shadows: [
-                      Shadow(
-                        offset: const Offset(3.0, 3.0), // X and Y offset for the shadow
-                        blurRadius: 8.0, // Blur effect for the shadow
-                        color: Colors.black12.withOpacity(0.7), // Shadow color and opacity
-
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Container(
-            height: screenHeight * 0.4,
-            color: cdColor,
-            child: Column(
+      backgroundColor: cdColor,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Stack(
               children: [
-                Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: TextFormField(
-                    controller: _assignmentController,
-                    keyboardType: TextInputType.visiblePassword,
-                    validator: (value){
-                      if(value == null || value.isEmpty){
-                        return 'Please Enter Assignment Name';
-                      }else if(value.length < 15){
-                        return 'Please Enter valid assignment name';
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 18),
-                      hintText: 'Assignment Name',
-                      hintStyle: TextStyle(
-                        color: bgColor,
-                        fontSize: screenWidth * 0.04
-                      ),
-                      fillColor: Colors.black.withOpacity(0.2),
-                      filled: true,
-                      prefixIcon: Icon(Icons.assignment,size: screenWidth * 0.07,),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
+                // stack image
+                Container(
+                  height: screenHeight * 0.17,
+                  decoration: const BoxDecoration(
+                    color: prColor,
                   ),
                 ),
+                // assignment name
                 Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: TextFormField(
-                    controller: _assignmentDescription,
-                    keyboardType: TextInputType.visiblePassword,
-                    validator: (value){
-                      if(value == null || value.isEmpty){
-                        return 'Please Enter Description';
-                      }else if(value.length < 15){
-                        return 'Please Enter valid Description';
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 18),
-                      hintText: 'Assignment description',
-                      hintStyle: TextStyle(
-                          color: bgColor,
-                          fontSize: screenWidth * 0.04
-                      ),
-                      fillColor: Colors.black.withOpacity(0.2),
-                      filled: true,
-                      prefixIcon: Icon(Icons.assignment,size: screenWidth * 0.07,),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        ElevatedButton(
-                          onPressed: pickPdfFile,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: seColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            padding: EdgeInsets.symmetric(vertical: screenWidth * 0.04, horizontal: screenWidth * 0.07),
-                          ),
-                          child: Text(
-                            pdfFileUrl ?? 'Select PDF File',
-                            style: const TextStyle(
-                                color: Colors.white, fontSize: 16),
-                          ),
+                  padding: EdgeInsets.only(left: screenWidth * 0.02, top: screenHeight * 0.11),
+                  child: Text(
+                  'Create Assignment',
+                    style: TextStyle(
+                      fontSize: screenWidth <= 750 ? screenWidth * 0.07 : 54,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      shadows: [
+                        Shadow(
+                          offset: const Offset(3.0, 3.0), // X and Y offset for the shadow
+                          blurRadius: 8.0, // Blur effect for the shadow
+                          color: Colors.black12.withOpacity(0.7), // Shadow color and opacity
+        
                         ),
-                        ElevatedButton(
-                        onPressed: () async {
-                          final pickedDate = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime.now(), // Set to today to prevent selecting past dates
-                            lastDate: DateTime(2101),
-                          );
-                          if (pickedDate != null) {
-                            setState(() {
-                              dueDate = pickedDate;
-                            });
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: seColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          elevation: 5,
-                          padding: EdgeInsets.symmetric(vertical: screenWidth * 0.04, horizontal: screenWidth * 0.07),
-                        ),
-                        child: Text(
-                          dueDate != null
-                              ? '${dueDate!.day}/${dueDate!.month}/${dueDate!.year}'
-                              : 'Select Date',
-                          style: const TextStyle(color: Colors.white, fontSize: 16),
-                        ),
-                      ),
-                    ],
-                                    ),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 30, left: 10, right: 10),
-                  child: SizedBox(
-                    child: ElevatedButton(
-                      onPressed: (){
-                        if(_assignmentController.text.isEmpty ||
-                            _assignmentDescription.text.isEmpty||
-                        dueDate == null || pdfFileUrl == null
-                        ){
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Please Enter Details')));
-                        }else{
-                          AssignmentApiService assignmentApi = AssignmentApiService();
-                          assignmentApi.createAssignmentApi(
-                              loginId, 'Ayush Verma',
-                              _assignmentController.text,
-                              _assignmentDescription.text,
-                              pdfFileUrl!, DateTime.now() ,dueDate!, context);
-
-                          _assignmentController.clear();
-                          _assignmentDescription.clear();
-                          dueDate = null;
-                          pdfFileUrl= null;
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: screenHeight * 0.01, horizontal: screenWidth * 0.18),
-                        backgroundColor: prColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child:  Text(
-                        'Create',
-                        style: TextStyle(
-                          color: cdColor,
-                          fontSize: screenWidth * 0.06,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
+                      ],
                     ),
                   ),
                 ),
               ],
+            ),
+            Container(
+              height: screenHeight * 0.7,
+              child: Column(
+                children: [
+                  SizedBox(
+              height: screenHeight * 0.6,
+                    child: Column(
+                      children: [
+                        // assignment name field
+                        Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: TextFormField(
+                            controller: _assignmentController,
+                            keyboardType: TextInputType.visiblePassword,
+                            validator: (value){
+                              if(value == null || value.isEmpty){
+                                return 'Please Enter Assignment Name';
+                              }else if(value.length < 15){
+                                return 'Please Enter valid assignment name';
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(vertical: 18),
+                              hintText: 'Assignment Name',
+                              hintStyle: TextStyle(
+                                  color: bgColor,
+                                  fontSize: screenWidth * 0.04
+                              ),
+                              fillColor: Colors.black.withOpacity(0.2),
+                              filled: true,
+                              prefixIcon: Icon(Icons.assignment,size: screenWidth * 0.07,),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
+                          ),
+                        ),
+                        // assignment description
+                        Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: TextFormField(
+                            controller: _assignmentDescription,
+                            keyboardType: TextInputType.visiblePassword,
+                            validator: (value){
+                              if(value == null || value.isEmpty){
+                                return 'Please Enter Description';
+                              }else if(value.length < 15){
+                                return 'Please Enter valid Description';
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(vertical: 18),
+                              hintText: 'Assignment description',
+                              hintStyle: TextStyle(
+                                  color: bgColor,
+                                  fontSize: screenWidth * 0.04
+                              ),
+                              fillColor: Colors.black.withOpacity(0.2),
+                              filled: true,
+                              prefixIcon: Icon(Icons.assignment,size: screenWidth * 0.07,),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
+                          ),
+                        ),
+                        // file & date
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // file
+                              ElevatedButton(
+                                onPressed: pickAndUploadPdf,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: seColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  padding: EdgeInsets.symmetric(vertical: screenWidth * 0.04, horizontal: screenWidth * 0.07),
+                                ),
+                                  child: Text(
+                                    pdfFileUrl == null
+                                        ? 'Select PDF File'
+                                        : 'Pdf selected',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: screenWidth * 0.037),
+                                  ),
+                                ),
+                                // date
+                                ElevatedButton(
+                                onPressed: () async {
+                                  final pickedDate = await showDatePicker(
+                                    context: context,
+                                    initialDate: DateTime.now(),
+                                    firstDate: DateTime.now(), // Set to today to prevent selecting past dates
+                                    lastDate: DateTime(2101),
+                                  );
+                                  if (pickedDate != null) {
+                                    setState(() {
+                                      dueDate = pickedDate;
+                                    });
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: seColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  elevation: 5,
+                                  padding: EdgeInsets.symmetric(vertical: screenWidth * 0.04, horizontal: screenWidth * 0.07),
+                                ),
+                                child: Text(
+                                  dueDate != null
+                                      ? '${dueDate!.day}/${dueDate!.month}/${dueDate!.year}'
+                                      : 'Select Date',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: screenWidth * 0.037
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if(pdfFileUrl != null)
+                          Container(
+                            padding: EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.picture_as_pdf, // PDF icon
+                                  color: Colors.red,
+                                  size: 40,
+                                ),
+                                SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    fileName,
+                                    // Display the file name
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                        fontSize: 16, fontWeight: FontWeight.w500),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // file
+                              ElevatedButton(
+                                onPressed: () async{
+                                  assignedStudentIds = await Navigator.push(context,
+                                      MaterialPageRoute(builder: (context)=>
+                                          AssignedStudentsScreen(
+                                              assignmentResponse: null,
+                                          )));
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: seColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  padding: EdgeInsets.symmetric(vertical: screenWidth * 0.04, horizontal: screenWidth * 0.07),
+                                ),
+                                child: Text(
+                                  'Assigned Students',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: screenWidth * 0.037),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // submit
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                    child: SizedBox(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          assignedStudentIds ??= List.empty();
+
+                          if (_assignmentController.text.isEmpty ||
+                              _assignmentDescription.text.isEmpty ||
+                              dueDate == null ||
+                              pdfFileUrl == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Please Enter Details')),
+                            );
+                          } else {
+                            // Safely access userName
+                            String? userName = Provider.of<UserProvider>(context, listen: false).userResponse?.userName;
+
+                            // Ensure userName is not null
+                            if (userName == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('User name is missing')),);
+                              return; // Exit the function if userName is null
+                            }
+                            AssignmentApiService assignmentApi = AssignmentApiService();
+                            bool status = await assignmentApi.createAssignmentApi(
+                              loginId, userName, _assignmentController.text,
+                              _assignmentDescription.text, pdfFileUrl!, DateTime.now(),
+                              dueDate!, assignedStudentIds!, context,
+                            );
+                            if (status) {
+                              _assignmentController.clear();
+                              _assignmentDescription.clear();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Assignment Created Successfully')),
+                              );
+                              Navigator.pushReplacement(context, MaterialPageRoute(
+                                  builder: (context) => AdminBottomNavigation()),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Failed to create assignment')),
+                              );
+                            }
+                          }
+                        },
+
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: screenHeight * 0.01, horizontal: screenWidth * 0.18),
+                          backgroundColor: prColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child:  Text(
+                          'Create',
+                          style: TextStyle(
+                            color: cdColor,
+                            fontSize: screenWidth * 0.06,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              )
             )
-          )
-        ],
+          ],
+        ),
       ),
     );
+  }
+  Future<void> pickAndUploadPdf() async {
+    // Pick the PDF file
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf'], // Allow only PDF files
+    );
+    if (result != null && result.files.isNotEmpty) {
+      File pickedFile = File(result.files.single.path!);
+      fileName = result.files[0].name;
+
+      showDialog(
+        context: context,
+        barrierDismissible: false, // Prevent dismissing by tapping outside the dialog
+        builder: (BuildContext context) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+      );
+      // Call Cloudinary upload method
+      CloudinaryApiService cloudinaryApiService = CloudinaryApiService();
+      String? pdfUrl = await cloudinaryApiService.uploadPdfToCloudinary(pickedFile);
+
+      // Check the result of the upload
+      if (pdfUrl != null) {
+        print('PDF uploaded successfully: $pdfUrl');
+        Navigator.of(context).pop();
+        setState(() {
+          pdfFileUrl = pdfUrl;
+        });
+        // Use the PDF URL as needed
+      } else {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to upload PDF')));
+        print('Failed to upload PDF');
+      }
+    } else {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('No file selected or file picker was cancelled')));
+      print("No file selected or file picker was cancelled.");
+    }
   }
 }

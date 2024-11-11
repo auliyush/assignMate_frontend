@@ -1,8 +1,13 @@
 import 'package:assign_mate/DataClasses/assignment_response.dart';
-import 'package:assign_mate/apiServices/assignment_api_service.dart';
-import 'package:assign_mate/assignment/assignment_card_page.dart';
-import 'package:assign_mate/colors.dart';
+import 'package:assign_mate/DataClasses/user_assigned_lists.dart';
+import 'package:assign_mate/Providers/login_provider.dart';
+import 'package:assign_mate/Providers/user_provider.dart';
+import 'package:assign_mate/apiServices/user_api_service.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../colors.dart';
+import 'assignment_card_page.dart';
 
 class AssignmentScreen extends StatefulWidget {
   const AssignmentScreen({super.key});
@@ -13,15 +18,16 @@ class AssignmentScreen extends StatefulWidget {
 
 class _AssignmentScreenState extends State<AssignmentScreen> {
 
-  late Future<List<AssignmentResponse>?> _listOfAssignments;
-  late AssignmentApiService assignmentApiService;
+  late Future<UserAssignmentList?> _listOfAssignments;
+  late UserApiService userApiService;
+
   @override
   void initState() {
     super.initState();
-    assignmentApiService = AssignmentApiService();
-    _listOfAssignments = assignmentApiService.getListOfAssignmentApi(context);
+    userApiService = UserApiService();
+    String userId = Provider.of<LoginProvider>(context, listen: false).loginResponse!.loginId;
+    _listOfAssignments = userApiService.getAssignedAssignmentApi(userId, context);
   }
-
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -52,7 +58,7 @@ class _AssignmentScreenState extends State<AssignmentScreen> {
                         offset: const Offset(3.0, 3.0), // X and Y offset for the shadow
                         blurRadius: 8.0, // Blur effect for the shadow
                         color: Colors.black12.withOpacity(0.7), // Shadow color and opacity
-                      // todo here
+                        // todo here
                       ),
                     ],
                   ),
@@ -61,48 +67,32 @@ class _AssignmentScreenState extends State<AssignmentScreen> {
             ],
           ),
           Expanded(
-            child: FutureBuilder<List<AssignmentResponse>?>(
-                future: _listOfAssignments,
-                builder: (context, snapshot){
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(
-                        child: Text('Something Error: ${snapshot.error}'));
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text('No Assignments available'));
-                  } else {
-                    List<AssignmentResponse> assignments = snapshot.data!;
-                    return ListView.builder(
+            child: FutureBuilder<UserAssignmentList?>(
+              future: _listOfAssignments,
+              builder: (context, snapshot){
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(
+                      child: Text('Something Error: ${snapshot.error}'));
+                } else if (!snapshot.hasData || snapshot.data!.assignmentList.isEmpty) {
+                  return const Center(child: Text('No Assignments available'));
+                } else {
+                  List<AssignmentResponse> assignments = snapshot.data!.assignmentList;
+                  return ListView.builder(
                       itemCount: assignments.length,
-                        itemBuilder: (context, index){
-                          return AssignmentCardPage(
-                              assignmentResponse: assignments[index],
-                          );
-                        }
-                    );
-                  }
-                },
-              ),
+                      itemBuilder: (context, index){
+                        return AssignmentCardPage(
+                          assignmentResponse: assignments[index],
+                        );
+                      }
+                  );
+                }
+              },
+            ),
           ),
         ],
       ),
     );
   }
 }
-
-/*
-AssignmentCardPage(
-                      assignmentName: 'Attendance Management System',
-                      assignmentDescription: "Develop a system to track, update, "
-                          "and report attendance records. The system willallow "
-                          "admins and instructors to mark attendance class-wise, "
-                          "specify attendance mode (online oroffline), and enable "
-                          "students to view their individual attendance report"
-                          ' assignment for better experience '
-                          'assignment for better experience '
-                          'assignment for better experience',
-                      assignmentCreatorName: 'ayush verma',
-                      assignmentDueDate: '09/11/2024'
-                  )
- */
