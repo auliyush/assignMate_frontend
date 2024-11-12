@@ -4,7 +4,9 @@ import 'package:assign_mate/DataClasses/assignment_response.dart';
 import 'package:assign_mate/admin/asigned_students_screen.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../Providers/login_provider.dart';
 import '../apiServices/assignment_api_service.dart';
 import '../DataClasses/colors.dart';
 
@@ -346,13 +348,15 @@ class _UpdateAssignmentScreenState extends State<UpdateAssignmentScreen> {
           );
         }
     );
+    String userId = Provider.of<LoginProvider>(context, listen: false).loginResponse!.loginId;
     final SupabaseClient supabase = Supabase.instance.client;
     final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
     if (result != null) {
       final file = File(result.files.single.path!);
-      final fileName = result.files.single.name;
+      final fileName = '$userId/${result.files.single.name}';
       try {
-        final response = await supabase.storage.from('assignmatepdf-uploads').upload(fileName, file);
+        final response = await supabase.storage.from('assignmatepdf-uploads')
+            .upload(fileName, file, fileOptions: const FileOptions(upsert: true));
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('File uploaded successfully')));
         setState(() {
           pdfFileUrl = supabase.storage.from('assignmatepdf-uploads').getPublicUrl(fileName);
@@ -364,6 +368,9 @@ class _UpdateAssignmentScreenState extends State<UpdateAssignmentScreen> {
         print('Error uploading file: $e');
         return;
       }
+    }else{
+      Navigator.of(context).pop();
+      return;
     }
   }
 }

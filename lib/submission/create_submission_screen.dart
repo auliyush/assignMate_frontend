@@ -48,6 +48,16 @@ class _CreateSubmissionScreenState extends State<CreateSubmissionScreen> {
                     color: prColor,
                   ),
                 ),
+                // back button
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.01, vertical: screenHeight * 0.04),
+                  child: IconButton(
+                    onPressed: (){
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(Icons.arrow_back_ios_new,color: cdColor),
+                  ),
+                ),
                 // assignment name
                 Padding(
                   padding: EdgeInsets.only(left: screenWidth * 0.02, top: screenHeight * 0.11),
@@ -266,22 +276,31 @@ class _CreateSubmissionScreenState extends State<CreateSubmissionScreen> {
             child: CircularProgressIndicator(),
           );
         });
+    String userId = Provider.of<LoginProvider>(context, listen: false).loginResponse!.loginId;
     final SupabaseClient supabase = Supabase.instance.client;
     final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
     if (result != null) {
       final file = File(result.files.single.path!);
-      final fileName = result.files.single.name;
+      final fileName = '$userId/${result.files.single.name}';
       try {
-        final response = await supabase.storage.from('assignmatepdf-uploads').upload(fileName, file);
+        final response = await supabase.storage.from('assignmatepdf-uploads')
+            .upload(fileName, file, fileOptions: const FileOptions(upsert: true));
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('File uploaded successfully')));
         setState(() {
           pdfFileUrl = supabase.storage.from('assignmatepdf-uploads').getPublicUrl(fileName);
         });
         print('File uploaded successfully: $pdfFileUrl');
+        Navigator.of(context).pop();
+        return;
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error uploading file')));
         print('Error uploading file: $e');
+        Navigator.of(context).pop();
+        return;
       }
+    }else{
+      Navigator.of(context).pop();
+      return;
     }
   }
 }

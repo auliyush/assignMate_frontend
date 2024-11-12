@@ -225,7 +225,7 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
                                 SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
-                                    fileName,
+                                    fileName.split('/').last,
                                     // Display the file name
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
@@ -352,13 +352,14 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
             child: CircularProgressIndicator(),
           );
         });
+    String userId = Provider.of<LoginProvider>(context, listen: false).loginResponse!.loginId;
     final SupabaseClient supabase = Supabase.instance.client;
     final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
     if (result != null) {
       final file = File(result.files.single.path!);
-      final fileN = result.files.single.name;
+      final fileN = '$userId/${result.files.single.name}';
       try {
-        final response = await supabase.storage.from('assignmatepdf-uploads').upload(fileN, file);
+        final response = await supabase.storage.from('assignmatepdf-uploads').upload(fileN, file, fileOptions: const FileOptions(upsert: true));
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('File uploaded successfully')));
         setState(() {
           pdfFileUrl = supabase.storage.from('assignmatepdf-uploads').getPublicUrl(fileN);
@@ -373,8 +374,12 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
         Navigator.of(context).pop();
         return;
       }
+    }else{
+      Navigator.of(context).pop();
+      return;
     }
   }
+
   Future<String> downloadAndSavePdf(String pdfUrl, BuildContext context) async {
     final directory = await getApplicationDocumentsDirectory();
     final filePath = '${directory.path}/$fileName';

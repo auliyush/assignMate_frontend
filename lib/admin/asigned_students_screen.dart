@@ -50,7 +50,7 @@ class _AssignedStudentsScreenState extends State<AssignedStudentsScreen> {
             children: [
               // container color
               Container(
-                height: screenHeight * 0.14,
+                height: screenHeight * 0.15,
                 decoration: const BoxDecoration(
                   color: prColor,
                 ),
@@ -67,7 +67,7 @@ class _AssignedStudentsScreenState extends State<AssignedStudentsScreen> {
               ),
               // text
               Padding(
-                padding:  EdgeInsets.only(left: screenWidth * 0.04, top: screenHeight * 0.07),
+                padding:  EdgeInsets.only(left: screenWidth * 0.04, top: screenHeight * 0.1),
                 child: Text(
                   "Assigned Students",
                   style: TextStyle(
