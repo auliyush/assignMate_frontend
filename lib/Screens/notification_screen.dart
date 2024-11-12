@@ -98,8 +98,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                 itemBuilder: (context, index){
                                   return NotificationCard(
                                     notificationResponse: snapshot.data!.notificationResponse[index],
-                                        // todo api call successfully you have to make a widget only and also
-                                    // todo check pdf feedback section
                                   );
                                 }
                             );

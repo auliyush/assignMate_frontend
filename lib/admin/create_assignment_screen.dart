@@ -343,49 +343,15 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
       ),
     );
   }
-  // Future<void> pickAndUploadPdf() async {
-  //   // Pick the PDF file
-  //   FilePickerResult? result = await FilePicker.platform.pickFiles(
-  //     type: FileType.custom,
-  //     allowedExtensions: ['pdf'], // Allow only PDF files
-  //   );
-  //   if (result != null && result.files.isNotEmpty) {
-  //     File pickedFile = File(result.files.single.path!);
-  //     fileName = result.files[0].name;
-  //
-  //     showDialog(
-  //       context: context,
-  //       barrierDismissible: false, // Prevent dismissing by tapping outside the dialog
-  //       builder: (BuildContext context) {
-  //         return const Center(
-  //           child: CircularProgressIndicator(),
-  //         );
-  //       },
-  //     );
-  //     // Call Cloudinary upload method
-  //     CloudinaryApiService cloudinaryApiService = CloudinaryApiService();
-  //     String? pdfUrl = await cloudinaryApiService.uploadPdfToCloudinary(pickedFile);
-  //
-  //     // Check the result of the upload
-  //     if (pdfUrl != null) {
-  //       print('PDF uploaded successfully: $pdfUrl');
-  //       Navigator.of(context).pop();
-  //       setState(() {
-  //         pdfFileUrl = pdfUrl;
-  //       });
-  //       // Use the PDF URL as needed
-  //     } else {
-  //       Navigator.of(context).pop();
-  //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to upload PDF')));
-  //       print('Failed to upload PDF');
-  //     }
-  //   } else {
-  //     Navigator.of(context).pop();
-  //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('No file selected or file picker was cancelled')));
-  //     print("No file selected or file picker was cancelled.");
-  //   }
-  // }
   Future<void> uploadFile() async {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        });
     final SupabaseClient supabase = Supabase.instance.client;
     final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
     if (result != null) {
@@ -400,9 +366,12 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
         });
         final fileUrl = supabase.storage.from('assignmatepdf-uploads').getPublicUrl(fileN);
         print('File uploaded successfully: $fileUrl');
+        Navigator.of(context).pop();
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error uploading file')));
-        print('Error uploading file: $e');
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error uploading File')));
+        print('Error uploading File: $e');
+        Navigator.of(context).pop();
+        return;
       }
     }
   }

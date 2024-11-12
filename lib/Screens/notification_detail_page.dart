@@ -59,19 +59,25 @@ class NotificationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(title: Text('Notification')),
       body: Align(
         alignment: Alignment.bottomCenter,
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: EdgeInsets.only(
+              left: screenWidth * 0.01,
+            right: screenWidth * 0.01,
+            bottom: screenHeight * 0.03,
+          ),
           child: Container(
             decoration: BoxDecoration(
               color: bgColor,
               borderRadius: BorderRadius.circular(5),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: EdgeInsets.all(screenWidth * 0.025),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -98,7 +104,7 @@ class NotificationPage extends StatelessWidget {
 
                   // Notification DateTime
                   Text(
-                    "${notificationResponse.notificationDate}     ${notificationResponse.notificationTime}",
+                    "${notificationResponse.notificationDate}",
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey,

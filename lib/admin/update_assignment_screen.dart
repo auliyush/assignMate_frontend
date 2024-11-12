@@ -282,12 +282,21 @@ class _UpdateAssignmentScreenState extends State<UpdateAssignmentScreen> {
                       child: SizedBox(
                         child: ElevatedButton(
                           onPressed: (){
+                            showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (BuildContext context) {
+                                  return Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                });
                             if(_assignmentController.text.isEmpty ||
                                 _assignmentDescription.text.isEmpty||
                                 dueDate == null || pdfFileUrl == null
                             ){
                               ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(content: Text('Please Enter Details')));
+                              Navigator.pop(context);
                             }else{
                               AssignmentApiService assignmentApi = AssignmentApiService();
                               assignmentApi.updateAssignmentApi(
@@ -328,6 +337,15 @@ class _UpdateAssignmentScreenState extends State<UpdateAssignmentScreen> {
     );
   }
   Future<void> uploadFile() async {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context){
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+    );
     final SupabaseClient supabase = Supabase.instance.client;
     final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
     if (result != null) {
@@ -340,9 +358,11 @@ class _UpdateAssignmentScreenState extends State<UpdateAssignmentScreen> {
           pdfFileUrl = supabase.storage.from('assignmatepdf-uploads').getPublicUrl(fileName);
         });
         print('File uploaded successfully: $pdfFileUrl');
+        return;
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error uploading file')));
         print('Error uploading file: $e');
+        return;
       }
     }
   }

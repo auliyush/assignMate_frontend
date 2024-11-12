@@ -179,7 +179,7 @@ class _CreateSubmissionScreenState extends State<CreateSubmissionScreen> {
                                   SizedBox(width: 10),
                                   Expanded(
                                     child: Text(
-                                      fileName,
+                                      pdfFileUrl!.split('/').last,
                                       // Display the file name
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
@@ -258,6 +258,14 @@ class _CreateSubmissionScreenState extends State<CreateSubmissionScreen> {
     );
   }
   Future<void> uploadFile() async {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        });
     final SupabaseClient supabase = Supabase.instance.client;
     final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
     if (result != null) {

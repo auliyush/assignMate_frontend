@@ -23,6 +23,7 @@ class NotificationCard extends StatelessWidget {
   }
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return GestureDetector(
       onTap: (){
         Navigator.push(context, MaterialPageRoute(builder: (context) => NotificationPage(notificationResponse:  notificationResponse)));
@@ -37,18 +38,27 @@ class NotificationCard extends StatelessWidget {
             children: [
               Text(
                 getShortTitle(),
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: screenWidth * 0.045
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 getShortDescription(),
-                style: const TextStyle(fontSize: 14, color: Colors.grey),
+                style: TextStyle(
+                    fontSize: screenWidth * 0.032,
+                    color: Colors.grey.shade700
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                '${notificationResponse.notificationDate}       '
-                   '${notificationResponse.notificationTime}',
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                   '${notificationResponse.notificationTime.split('.').first}',
+                style: TextStyle(
+                    fontSize: screenWidth * 0.029,
+                    color: Colors.grey.shade700
+                ),
               ),
             ],
           ),

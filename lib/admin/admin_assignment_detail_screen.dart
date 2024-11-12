@@ -20,7 +20,6 @@ class AdminAssignmentDetailScreen extends StatefulWidget {
   State<AdminAssignmentDetailScreen> createState() => _AdminAssignmentDetailScreenState();
 }
 
-
 class _AdminAssignmentDetailScreenState extends State<AdminAssignmentDetailScreen> {
   late Future<List<SubmissionResponse>?> _listOfSubmissions;
   SubmissionApiService submissionApiService = SubmissionApiService();
@@ -188,9 +187,14 @@ class _AdminAssignmentDetailScreenState extends State<AdminAssignmentDetailScree
                                           size: screenWidth * 0.12,
                                         ),
                                       ),
-                                      Text(
-                                        widget.assignment.file.split('/').last
-                                      )
+                                      Container(
+                                        width: screenWidth * 0.7,
+                                        // todo apply overflow every card
+                                        child: Text(
+                                          widget.assignment.file.split('/').last,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),

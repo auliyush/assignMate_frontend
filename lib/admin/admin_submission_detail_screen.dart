@@ -5,13 +5,10 @@ import 'package:assign_mate/apiServices/feedback_api_service.dart';
 import 'package:assign_mate/apiServices/submission_api_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-
 import '../DataClasses/colors.dart';
 import '../Screens/pdf_screen.dart';
-import 'admin_assignment_detail_screen.dart';
 
 class AdminSubmissionDetailScreen extends StatefulWidget {
   SubmissionResponse submission;
@@ -27,18 +24,14 @@ class AdminSubmissionDetailScreen extends StatefulWidget {
 class _AdminSubmissionDetailScreenState extends State<AdminSubmissionDetailScreen> {
   String? selectedOption;
   String finalSelection = "";
-   FeedbackResponse? feedbackResponse;
+  late Future<FeedbackResponse?> _feedbackResponse;
    final _feedbackController = TextEditingController();
   FeedbackApiService feedbackApiService = FeedbackApiService();
   SubmissionApiService submissionApiService = SubmissionApiService();
   @override
   void initState() {
     super.initState();
-    fetchFeedback();
-  }
-
-  Future<void> fetchFeedback() async {
-    feedbackResponse = await feedbackApiService.getFeedbackApi(widget.submission.submissionId, context);
+    _feedbackResponse = feedbackApiService.getFeedbackApi(widget.submission.submissionId, context);
   }
 
   @override
@@ -46,6 +39,7 @@ class _AdminSubmissionDetailScreenState extends State<AdminSubmissionDetailScree
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
+      backgroundColor: bgColor,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -99,8 +93,11 @@ class _AdminSubmissionDetailScreenState extends State<AdminSubmissionDetailScree
                 bottom: screenHeight * 0.01,
               ),
               child: Container(
-                height: screenHeight * 0.4,
-                color: cdColor,
+                height: screenHeight * 0.35,
+                decoration: BoxDecoration(
+                  color: cdColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -163,7 +160,7 @@ class _AdminSubmissionDetailScreenState extends State<AdminSubmissionDetailScree
                           top: screenHeight * 0.01,
                           left: screenWidth * 0.02
                       ),
-                      height: screenHeight * 0.13,
+                      height: screenHeight * 0.15,
                       child: Text(
                         'Objective - ${widget.submission.submissionDescription}',
                         style: const TextStyle(
@@ -202,9 +199,14 @@ class _AdminSubmissionDetailScreenState extends State<AdminSubmissionDetailScree
                                     size: screenWidth * 0.12,
                                   ),
                                 ),
-                                Text(
-                                    widget.submission.file.split('/').last
-                                )
+                                Container(
+                                  width: screenWidth * 0.7,
+                                  // todo apply overflow every card
+                                  child: Text(
+                                    widget.submission.file.split('/').last,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -215,55 +217,53 @@ class _AdminSubmissionDetailScreenState extends State<AdminSubmissionDetailScree
               ),
             ),
             // feedback
-            if(feedbackResponse != null)
-            Padding(
-                padding: EdgeInsets.only(
-                    left: screenWidth * 0.02,
-                  right: screenWidth * 0.02,
-                ),
-                    child: Container(
-                      color: cdColor,
-                      height: screenHeight * 0.1,
-                      width: screenWidth,
-                      child: Text(
-                        'Feedback - ${feedbackResponse!.feedback}'
+            FutureBuilder <FeedbackResponse?>(
+                future: _feedbackResponse,
+                builder: (context, snapshot){
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    print(snapshot.error);
+                    return Center(
+                        child: Text('Something Error'));
+                  } else if (!snapshot.hasData || snapshot.data == null && Provider.of<LoginProvider>(context, listen: false).loginResponse!.userRole == 'admin') {
+                    return Align(
+                      alignment: Alignment.bottomCenter,
+                      child: _buildFeedbackTextField(screenWidth),
+                    );
+                  }else{
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        left: screenWidth * 0.02,
+                        right: screenWidth * 0.02,
                       ),
-                    ),
+                      child: Container(
+                        height: screenHeight * 0.07,
+                        width: screenWidth,
+                        decoration: BoxDecoration(
+                            color: cdColor,
+                          borderRadius: BorderRadius.circular(8)
+                        ),
+                        child: Row(
+                         children: [
+                           Padding(
+                             padding: const EdgeInsets.all(8.0),
+                             child: Icon(Icons.feed_outlined),
+                           ),
+                           Text(
+                             'Feedback - ${snapshot.data!.feedback}',
+                             style: TextStyle(
+                                 fontWeight: FontWeight.w400,
+                                 color: txColor
+                             ),
+                           ),
+                         ],
+                        ),
+                      ),
+                    );
+                  }
+                }
             ),
-            if(Provider.of<LoginProvider>(context, listen: false).loginResponse!.userRole == 'admin' &&
-                feedbackResponse == null)
-              Container(
-                margin: EdgeInsets.only(
-                    left: screenWidth * 0.02,
-                    right: screenWidth * 0.02,
-                    
-                ),
-                decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.2), // Shadow color
-                      spreadRadius: 2, // Spread radius
-                      blurRadius: 3, // Blur radius
-                      offset: Offset(0, 3), // Offset in x and y direction
-                    ),
-                  ],
-                ),
-                child: TextFormField(
-                  controller: _feedbackController,
-                  decoration: InputDecoration(
-                    hintText: 'Give Feedback...',
-                    hintStyle: const TextStyle(color: Colors.grey),
-                    fillColor: cdColor,
-                    filled: true,
-                    prefixIcon: Icon(Icons.feed),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      borderSide: BorderSide.none,
-                    ),
-        
-                  ),
-                ),
-              ),
             // status
             if(widget.submission.submissionStatus == "Pending" &&
                 Provider.of<LoginProvider>(context, listen: false).loginResponse!.userRole == 'admin')
@@ -324,9 +324,6 @@ class _AdminSubmissionDetailScreenState extends State<AdminSubmissionDetailScree
                         widget.submission.submissionId, selectedOption!, context);
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Updated')));
                       Navigator.of(context).pop();
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => AdminSubmissionDetailScreen(submission: widget.submission),
-                      ));
                     }
                   },
                 style: ElevatedButton.styleFrom(
@@ -371,4 +368,40 @@ class _AdminSubmissionDetailScreenState extends State<AdminSubmissionDetailScree
     Navigator.of(context).pop();
     return filePath;
   }
+
+  Widget _buildFeedbackTextField(double screenWidth){
+    return Container(
+      margin: EdgeInsets.only(
+        left: screenWidth * 0.02,
+        right: screenWidth * 0.02,
+
+      ),
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2), // Shadow color
+            spreadRadius: 2, // Spread radius
+            blurRadius: 3, // Blur radius
+            offset: Offset(0, 3), // Offset in x and y direction
+          ),
+        ],
+      ),
+      child: TextFormField(
+        controller: _feedbackController,
+        decoration: InputDecoration(
+          hintText: 'Give Feedback...',
+          hintStyle: const TextStyle(color: Colors.grey),
+          fillColor: cdColor,
+          filled: true,
+          prefixIcon: Icon(Icons.feed),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide.none,
+          ),
+
+        ),
+      ),
+    );
+  }
+
 }

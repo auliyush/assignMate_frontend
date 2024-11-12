@@ -50,15 +50,6 @@ class FeedbackApiService{
 
   Future<FeedbackResponse?> getFeedbackApi(String submissionId, BuildContext context)
   async{
-    showDialog(
-      context: context,
-      barrierDismissible: false, // Prevent dismissing by tapping outside the dialog
-      builder: (BuildContext context) {
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      },
-    );
     try{
       final url = Uri.parse(getFeedbackUrl).replace(queryParameters: {
         'submissionId' : submissionId,
@@ -69,8 +60,6 @@ class FeedbackApiService{
         final jsonData = jsonDecode(response.body);
         final apiResponse = ApiResponse.fromJson(jsonData);
         if(apiResponse.data == null){
-          ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(apiResponse.errorMessage)));
           return null;
         }else{
           final feedback = FeedbackResponse.fromJson(apiResponse.data);
